@@ -41,7 +41,28 @@
               // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
               // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
           }).then((instance) => {
-              unityInstance = instance; // Store globally for Lucid Portal communication
+              unityInstance = instance; // Store globally for postMessage communication
+
+              // Complete Lucid Portal message handling system
+              window.addEventListener('message', function (event) {
+                  // Handle role assignment from Lucid Portal
+                  if (event.data && event.data.type === 'roleAssignment') {
+                      unityInstance.SendMessage('LucidPortalBridge', 'SetRole', event.data.role);
+                  }
+
+                  // Handle interaction mirroring for viewers
+                  if (event.data && event.data.type === 'mirrorInteraction') {
+                      unityInstance.SendMessage('InteractionHandler', 'HandleMirroredInteraction', JSON.stringify(event.data));
+                  }
+              });
+
+              // Send Unity ready signal to Lucid Portal
+              window.parent.postMessage({
+                  type: 'unityReady',
+                  role: '',
+                  timestamp: Date.now()
+              }, '*');
+
           }).catch((message) => {
               alert(message);
           });
