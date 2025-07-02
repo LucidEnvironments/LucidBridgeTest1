@@ -47,12 +47,17 @@
               window.addEventListener('message', function (event) {
                   // Handle role assignment from Lucid Portal
                   if (event.data && event.data.type === 'roleAssignment') {
-                      unityInstance.SendMessage('LucidPortalBridge', 'SetRole', event.data.role);
+                      var message = {
+                          type: 'roleAssignment',
+                          role: event.data.role,
+                          timestamp: Date.now()
+                      };
+                      unityInstance.SendMessage('LucidPortalBridge', 'ReceiveMessage', JSON.stringify(message));
                   }
 
                   // Handle interaction mirroring for viewers
                   if (event.data && event.data.type === 'mirrorInteraction') {
-                      unityInstance.SendMessage('InteractionHandler', 'HandleMirroredInteraction', JSON.stringify(event.data));
+                      unityInstance.SendMessage('LucidPortalBridge', 'ReceiveMessage', JSON.stringify(event.data));
                   }
               });
 
